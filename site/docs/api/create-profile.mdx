@@ -1,0 +1,266 @@
+---
+title: createProfile | API | Lovit
+---
+
+# createProfile
+
+`createProfile` is a function that defines the error handling logic for a specific module. You can name the profile according to the corresponding module, such as `postProfile`, because each profile focuses on a particular section of the app (module).
+
+```js title="js"
+const postProfile = createProfile({
+  name: 'post',
+  tasks: {
+    getPosts: {
+      notFound: (context) => {
+        console.warn('⚠️ Posts not found:', context);
+      },
+      catch: (error) => {
+        console.error('❌ Error fetching posts:', error);
+      }
+    },
+    createPost: {
+      badRequest: (context) => {
+        console.warn('⚠️ Bad request:', context);
+      }
+    }
+  }
+});
+```
+
+Here, we define logic for handling errors with Lovit. For example, if the entry function `getPosts` receives a server response with status `404`, Lovit will automatically trigger the `notFound` handler you defined.
+
+This profile will then be used in the [configureLovit](/api/configure-lovit) function to connect your entry functions with their corresponding error handlers.
+
+## Options
+
+```ts title="ts"
+import type { Handlers } from '../utils/handler';
+
+interface ProfileOptions {
+  name: string;
+  tasks?: Record<string, Handlers>;
+  sharedHandlers?: Handlers;
+}
+```
+
+### `name`
+
+The `name` property specifies the module that the profile belongs to.
+
+```js {2} title="js"
+const postProfile = createProfile({
+  name: 'post'
+});
+```
+
+### `tasks`
+
+The `tasks` property defines which [entry functions](/guide/concepts#entry-function) inside the [module](/guide/concepts#module) you want to handle.
+
+Each key inside `tasks` (like `getPosts`, `createPost`) matches the name of an entry function that needs error handling.
+
+```js {3-6} title="js"
+const postProfile = createProfile({
+  name: 'post',
+  tasks: {
+    getPosts: {...},
+    createPost: {...}
+  }
+});
+```
+
+Now, handlers defines what happens when a specific error occurs within an entry function. Each handler is a function that deals with a particular type of error, such as `notFound` or `catch`.
+
+```js {5-7} title="js"
+const postProfile = createProfile({
+  name: 'post',
+  tasks: {
+    getPosts: {
+      notFound: (context) => console.warn('⚠️ Posts not found:', context),
+      catch: (error) => console.error('❌ Error fetching posts:', error),
+      finally: () => console.log('✅ Done handling getPosts task')
+    }
+  }
+});
+```
+
+For example, in the `getPosts` entry function, if the server responds with a `404` error (post not found), the `notFound` handler will be triggered. If anything else goes wrong during the execution, the `catch` handler will be called.
+
+These handlers work similarly to a `try-catch-finally` block. Here's how you can imagine Lovit managing tasks internally:
+
+```js title="js"
+try {
+  const res = await fetch('http://localhost:3001/posts');
+
+  if (res.status === 404) {
+    // simulate notFound handler
+    console.warn('⚠️ Posts not found');
+  }
+
+  return res;
+} catch (error) {
+  // simulate catch handler
+  console.error('❌ Error fetching posts:', error);
+} finally {
+  // simulate finally handler
+  console.log('✅ Done handling getPosts task');
+}
+```
+
+But, with Lovit, your function can be much cleaner:
+
+```js title="js"
+async function getPosts() {
+  const res = await fetchLovit({
+    key: 'post.getPosts',
+    url: 'http://localhost:3001/posts'
+  });
+
+  const posts = await res.json();
+  return posts;
+}
+```
+
+Learn more about [fetchLovit](/api/fetch-lovit) or see the full list of [available handlers](/api/create-profile#available-handlers).
+
+### `sharedHandlers`
+
+**SharedHandlers** are handlers used across all tasks in a module — so you don’t have to repeat the same logic in every task.
+
+```js title="js" {3-6}
+const postProfile = createProfile({
+  name: 'post',
+  sharedHandlers: {
+    catch: (error) => console.error('🔥 Shared error:', error),
+    notFound: (context) => console.warn('📭 Nothing found:', context)
+  }
+});
+```
+
+If every task uses the same `catch` or `notFound` handler, define them once in `sharedHandlers` to keep your code clean and DRY.
+
+## Available Handlers
+
+Here’s a list of available handlers for all HTTP status errors:
+
+```js title="js"
+const STATUS_HANDLERS = {
+  // client error
+  400: 'badRequest',
+  401: 'unauthorized',
+  402: 'paymentRequired',
+  403: 'forbidden',
+  404: 'notFound',
+  405: 'methodNotAllowed',
+  406: 'notAcceptable',
+  407: 'proxyAuthRequired',
+  408: 'requestTimeout',
+  409: 'conflict',
+  410: 'gone',
+  411: 'lengthRequired',
+  412: 'preconditionFailed',
+  413: 'contentTooLarge',
+  414: 'uriTooLong',
+  415: 'unsupportedMediaType',
+  416: 'rangeNotSatisfiable',
+  417: 'expectationFailed',
+  418: 'imATeapot',
+  421: 'misdirectedRequest',
+  422: 'unprocessableContent',
+  423: 'locked',
+  424: 'failedDependency',
+  425: 'tooEarly',
+  426: 'upgradeRequired',
+  428: 'preconditionRequired',
+  429: 'tooManyRequests',
+  431: 'requestHeaderFieldsTooLarge',
+  451: 'unavailableForLegalReasons',
+
+  // server error
+  500: 'internalServerError',
+  501: 'notImplemented',
+  502: 'badGateway',
+  503: 'serviceUnavailable',
+  504: 'gatewayTimeout',
+  505: 'httpVersionNotSupported',
+  506: 'variantAlsoNegotiates',
+  507: 'insufficientStorage',
+  508: 'loopDetected',
+  510: 'notExtended',
+  511: 'networkAuthRequired'
+};
+```
+
+Each handler corresponds to a specific HTTP error status code and receives a context parameter:
+
+```ts title="ts"
+type StatusHandler = (context: Context) => void | Promise<void>;
+```
+
+As you can see, the handler can also can return a promise-meaning you can perform async operations inside it, like this:
+
+```js title="js"
+notFound: async (context) => {
+  await sendToAnalytics('NotFoundError', context);
+  console.warn('⚠️ Posts not found:', context);
+};
+```
+
+### Additional Handlers
+
+```ts title="ts"
+type CatchHandler = (error: unknown) => void | Promise<void>;
+type FinallyHandler = () => void | Promise<void>;
+type FailedHandler = (context: Context) => void | Promise<void>;
+```
+
+The failed handler is a fallback for any error in a task—but only if no more specific handler is defined.
+
+```js title="js"
+const postProfile = createProfile({
+  name: 'post',
+  tasks: {
+    getPosts: {
+      notFound: (context) => console.warn('⚠️ Posts not found:', context),
+      catch: (error) => console.error('❌ Error fetching posts:', error),
+      failed: (context) => console.error('❌ Something went wrong:', context)
+    }
+  }
+});
+```
+
+If the response of getPosts is a `404` status (e.g., "Not Found"), the notFound handler will be triggered.
+
+If there is any other error during the request, like a network issue, the catch handler will be triggered.
+
+If the response from the server is a status like `400`, `401`, or any other status that doesn’t have a corresponding handler defined, the failed handler will be triggered.
+
+It’s useful for avoiding repeated error handling logic across multiple handlers in a task. However, if you define a specific handler (like `notFound` or `unauthorized`), Lovit will use that and skip the failed handler.
+
+To define handlers that apply to all modules, check out the [global handlers](/api/configure-lovit#global).
+
+### Context
+
+If you're a TypeScript user, you can use the `Context` type from Lovit.
+
+```ts title="ts"
+interface Context {
+  data: Record<string, any>;
+  response: any;
+  statusText: string;
+  statusCode: number | 'unknown';
+  module: string;
+  task: string;
+  handler: StatusHandlerName;
+}
+```
+
+The context is an object automatically passed to all status error handlers and contains useful information about the error that occurred during the API request. It helps you better understand and respond to the error.
+
+- **data**: Any custom data that was passed from the corresponding [fetchLovit](/api/fetch-lovit#data).
+- **response**: The non-OK (failure) response or error thrown by the service returned from the `requestFn` or `url`.
+- **statusText**: The HTTP status text (e.g., "Not Found", "OK").
+- **statusCode**: The HTTP status code (e.g., 404, 500).
+- **module**: The name of the [module](/guide/concepts#module) where the error occurred (e.g., "post").
+- **task**: The name of the entry function that caused the error (e.g., "getPosts").
+- **handler**: The name of the handler triggered by the error (e.g., "notFound").

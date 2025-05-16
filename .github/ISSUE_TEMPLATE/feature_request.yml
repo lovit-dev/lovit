@@ -1,0 +1,29 @@
+name: Feature request
+description: Suggest new features or improvements for Lovit.
+title: 'Suggest a new feature'
+labels: [feature]
+assignees: []
+body:
+  - type: checkboxes
+    attributes:
+      label: Before You Submit
+      description: Take a couple minutes to help maintainers work faster.
+      options:
+        - label: I have [searched](https://github.com/lovit-dev/lovit/issues?utf8=%E2%9C%93&q=is%3Aissue) for duplicate or closed issues
+          required: true
+        - label: I have read the [contributing guidelines](https://github.com/lovit-dev/lovit/blob/main/.github/CONTRIBUTING.md)
+          required: true
+  - type: textarea
+    id: suggestion
+    attributes:
+      label: Suggestion
+      description: Describe the feature you'd like to see, including links, screenshots, or demos if applicable.
+    validations:
+      required: true
+  - type: textarea
+    id: motivation
+    attributes:
+      label: Motivation
+      description: Explain why is this change helpful? What problem does it fix?
+    validations:
+      required: true

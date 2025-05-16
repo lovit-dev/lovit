@@ -1,0 +1,13 @@
+{
+  // Enable eslint validation for js and ts files
+  "eslint.validate": ["javascript", "typescript"],
+
+  // Always use the `package.json`'s `typescript`
+  "typescript.tsdk": "node_modules/typescript/lib",
+
+  // Tailwind CSS IntelliSense: recognize class names inside these function
+  "tailwindCSS.classFunctions": ["cva", "cx"],
+
+  // Tailwind CSS IntelliSense: use config file
+  "tailwindCSS.experimental.configFile": "site/src/styles/index.css"
+}

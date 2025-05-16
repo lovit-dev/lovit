@@ -1,0 +1,96 @@
+---
+title: throwError | API | Lovit
+---
+
+# throwError
+
+`throwError` is similar to `throw new Error("message")`, but it throws a `LovitError`, which lets you attach additional properties.
+
+<Callout>
+  When working with Lovit, you should use the `throwError` function instead of JavaScript’s built-in `throw`, especially
+  inside handlers and [entry functions](/guide/concepts#entry-function).
+</Callout>
+
+```js {11-13} title="js"
+import { fetchLovit, throwError } from 'lovit';
+
+async function getPosts() {
+  const res = await fetchLovit({
+    key: 'post.getPosts',
+    url: 'http://localhost:3001/posts'
+  });
+
+  const posts = await res.json();
+
+  if (posts.length > 2000) {
+    throwError({ message: 'Too many posts found.', status: 400 });
+  }
+
+  return posts;
+}
+```
+
+As you can see, if the number of posts is too large, we throw an error with a custom message and status.
+
+The thrown error above will be caught by the corresponding catch handler you defined.
+
+If you throw an error inside a handler like `notFound`, it will be caught by the `catch` handler you defined:
+
+```js title="js"
+const postProfile = createProfile({
+  name: 'post',
+  tasks: {
+    getPosts: {
+      notFound: (context) => {
+        throwError('⚠️ Posts not found');
+      },
+      catch: (error) => {
+        error.message; // ⚠️ Posts not found
+      }
+    }
+  }
+});
+```
+
+## Arguments
+
+`throwError` takes an input and an optional message type as arguments:
+
+```ts title="ts"
+type throwError = (input: string | ThrowErrorOptions, messageType?: MessageType) => never;
+```
+
+### `input`
+
+The input can be either an error message as a string or an object containing options.
+
+### `messageType`
+
+The messageType can be "Error", "Warning", or "Info". It will be prefixed to the thrown error message. The default is "Error".
+
+## Options
+
+If you're a TypeScript user, you can use the `ThrowErrorOptions` type from Lovit.
+
+```ts title="ts"
+interface ThrowErrorOptions {
+  message: string;
+  [key: string | symbol]: any;
+}
+```
+
+### `message`
+
+The error message that describes the error being thrown.
+
+### `custom properties`
+
+You can add any additional properties to the thrown error object, which can then be accessed later.
+
+```js title="js"
+throwError({
+  message: 'Your Error Message',
+  status: 400,
+  statusText: 'Bad Request'
+});
+```

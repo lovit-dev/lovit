@@ -1,0 +1,56 @@
+---
+title: Lovit Error | API | Lovit
+---
+
+# LovitError
+
+`LovitError` is a custom error class that extends JavaScript's built-in `Error` class, allowing you to include error type (messageType) and other custom properties.
+
+```js title="js"
+const lovitError = new LovitError('Invalid input', {
+  messageType: 'Error',
+  field: 'email',
+  code: 400
+});
+
+lovitError.field; // 'email'
+lovitError.code; // 400
+```
+
+<Callout>
+  When working with Lovit, you should use `LovitError` instead of JavaScript’s built-in `Error` constructor, especially
+  inside handlers and entry functions.
+</Callout>
+
+## Arguments
+
+`LovitError` constructor takes a message string and optional additional metadata
+
+```ts title="ts"
+constructor(message: string, meta: Meta = {}) {}
+```
+
+### `message`
+
+The error message that describes the error being thrown.
+
+### `meta`
+
+If you're a TypeScript user, you can use the `MessageType` and `Meta` type from Lovit.
+
+```ts title="ts"
+type MessageType = 'Error' | 'Warning' | 'Info';
+
+interface Meta {
+  messageType?: MessageType; // Default is 'Error'
+  [key: string | symbol]: any;
+}
+```
+
+### `messageType`
+
+The type of the message that will be prefixed to the thrown error message, e.g., "Lovit Info: Something went wrong".
+
+### `Custom Properties`
+
+You can add any additional properties to the thrown error object, which can then be accessed later.

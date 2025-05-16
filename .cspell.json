@@ -1,0 +1,20 @@
+{
+  "version": "0.2",
+  "language": "en-US",
+  "words": [
+    "Lovit",
+    "lovit",
+    "loovit",
+    "bundlewatch",
+    "unstub",
+    "frontmatter",
+    "recma",
+    "shiki",
+    "rehype",
+    "FaXmark",
+    "Mohamad",
+    "Salman"
+  ],
+  "ignorePaths": [".cspell.json"],
+  "useGitignore": true
+}

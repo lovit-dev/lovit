@@ -1,0 +1,233 @@
+---
+title: fetchLovit | API | Lovit
+---
+
+# fetchLovit
+
+`fetchLovit` works similarly to the native JavaScript `fetch` function but is specifically built to integrate with Lovit, offering additional options. You need to use `fetchLovit` instead of `fetch` to enable error handling through Lovit.
+
+```js title="js"
+import { fetchLovit } from 'lovit';
+
+async function getPosts() {
+  const res = await fetchLovit({
+    key: 'post.getPosts',
+    url: 'http://localhost:3001/posts'
+  });
+
+  const posts = await res.json();
+
+  return posts;
+}
+```
+
+As you can see, it works just like `fetch`, which fetches posts from an API, converts the response to JSON, and then returns it. You also notice that it takes a configuration object, which is explained here under [options section](/api/fetch-lovit#options).
+
+## Options
+
+`fetchLovit` takes an options object that helps Lovit manage and understand errors better. If you're a TypeScript user, you can use the `FetchConfig` and `StatusPathOptions` type from Lovit.
+
+```ts title="ts"
+interface FetchConfig {
+  key: `${string}.${string}`;
+  url?: string;
+  requestFn?: (...args: any[]) => any;
+  noStatus?: boolean;
+  options?: RequestInit;
+  statusPath?: StatusPathOptions | string;
+  data?: Record<string, any>;
+}
+
+interface StatusPathOptions {
+  path?: string;
+  inCatchBlock?: boolean;
+  errorName?: string;
+}
+```
+
+### `url`
+
+The `url` is the address of the API you want to send a request to — just like the first argument in the native JavaScript fetch function. An alternative to using `requestFn`.
+
+```js {3} title="js"
+async function getPosts() {
+  const res = await fetchLovit({
+    url: 'http://localhost:3001/posts'
+  });
+}
+```
+
+### `requestFn`
+
+The `requestFn` option lets you pass a custom function that handles the request. This is useful when you're not working with a traditional URL-based API, or when you want to use other tools (like Firebase, Axios, or custom logic) to make the request. An alternative to using `url`.
+
+```js {5} title="js"
+import { signInWithEmailAndPassword } from 'firebase/auth';
+
+async function signInUser(email, password) {
+  const res = await fetchLovit({
+    requestFn: () => signInWithEmailAndPassword(auth, email, password)
+  });
+
+  return res.user;
+}
+```
+
+If the function doesn’t require arguments, you can directly pass the function itself:
+
+```js {3} title="js"
+async function deletePost() {
+  const res = await fetchLovit({
+    requestFn: deletePostApi
+  });
+}
+```
+
+<Callout type='info'>
+  The function you pass to `requestFn` can be asynchronous (i.e., it returns a promise) or synchronous if no
+  asynchronous operations are involved. However, you still need to await `fetchLovit` even if it's synchronous.
+</Callout>
+
+### `key`
+
+A unique string that identifies the request. It follows the format <code>moduleName.taskName</code> which helps Lovit organize and track different API calls.
+
+Learn more about tasks and modules on the [Concepts section](/guide/concepts).
+
+```js {3} title="js"
+async function getPosts() {
+  const res = await fetchLovit({
+    key: 'post.getPosts'
+  });
+}
+```
+
+### `options`
+
+Additional options for the fetch request, such as headers or method. It's just same like the second argument in the native `fetch` function.
+
+```js {2-8, 12} title="js"
+async function createPost(post) {
+  const options = {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(post)
+  };
+
+  const res = await fetchLovit({
+    url: 'http://localhost:3001/posts',
+    options
+  });
+}
+```
+
+### `noStatus`
+
+Tells Lovit not to extract or check any status from the response returned by the API, whether it's from the <code>url</code> or the custom <code>requestFn</code>.
+
+```js {3} title="js"
+async function getPosts() {
+  const res = await fetchLovit({
+    noStatus: true
+  });
+}
+```
+
+### `statusPath`
+
+Tells Lovit where to find the status inside the response returned by the API — whether the request was made using <code>url</code> or a custom <code>requestFn</code>.
+
+```js {3} title="js"
+async function getPosts() {
+  const res = await fetchLovit({
+    statusPath: 'status.code'
+  });
+}
+```
+
+This means that if your response looks like this:
+
+```json title="json"
+{
+  "status": {
+    "code": 200
+  },
+  "data": [...]
+}
+```
+
+Lovit will look for the status at `response.status.code`.
+
+If you need more control, you can pass an object instead of a string to configure how Lovit extracts the status:
+
+```js {4-6} title="js"
+async function getPosts() {
+  const res = await fetchLovit({
+    statusPath: {
+      path: 'status.statusCode',
+      inCatchBlock: true,
+      errorName: 'FirebaseError'
+    }
+  });
+}
+```
+
+**path**: Tells Lovit where to find the status inside the response — the same as when you pass a string directly to statusPath.
+
+**inCatchBlock**: Set to `true` if the status comes from a thrown error (e.g. Firebase). Lovit will then look inside the error object.
+
+```js {6} title="js"
+async function signInUser(email, password) {
+  const res = await fetchLovit({
+    requestFn: () => signInWithEmailAndPassword(auth, email, password),
+    statusPath: {
+      path: 'code',
+      inCatchBlock: true,
+      errorName: 'FirebaseError'
+    }
+  });
+
+  return res.user;
+}
+```
+
+This tells Lovit to extract the status from the caught error — useful for Firebase-style or similar error handling.
+
+**errorName**: If `inCatchBlock` is `true`, you must also specify the name of the error (e.g., 'FirebaseError' or 'AuthApiError'). This helps Lovit differentiate between types of errors, such as `TypeError` and `ServiceError`.
+
+### `data`
+
+The data option allows you to pass custom data from the [entry function](/guide/concepts#entry-function), which can then be accessed in any error status handler. This can be useful if you need to pass additional context or information related to the request.
+
+More on error status handler in [CreateProfile section](/api/create-profile).
+
+```js {2, 4} title="js"
+async function getPosts() {
+  const customData = { userId: 123, postId: 456 };
+
+  const res = await fetchLovit({
+    data: customData
+  });
+}
+```
+
+## Return Type
+
+`fetchLovit` returns a **Promise** which resolves to exactly what the `url` or the `requestFn` returns for a response.
+
+If you are TypeScript user, you can take advantage of generics to specify the returned response type. By default, the response is of type [Response](https://developer.mozilla.org/en-US/docs/Web/API/Response).
+
+```ts /<Post[]>/ title="ts"
+async function getPosts() {
+  const res = await fetchLovit<Post[]>({
+    key: 'post.getPosts',
+    url: 'http://localhost:3001/posts'
+  });
+
+  return res;
+}
+```
+
+In this example, TypeScript understands that the return type from `fetchLovit` is expected to be of type `Promise<Post[]>`, ensuring type safety when handling the response.

@@ -1,0 +1,47 @@
+.copy-button {
+  @apply pointer-events-none invisible absolute top-4 right-4 z-99 cursor-pointer rounded-sm bg-black-dark p-1 text-xs text-grey-light opacity-0 ring-2 ring-black-light-2 transition-all duration-250;
+}
+
+[data-rehype-pretty-code-figure] {
+  @apply relative;
+
+  pre {
+    @apply relative scrollbar-thin overflow-x-auto rounded-lg border border-black-light-2 bg-black-dark text-sm leading-6 text-gray-100 scrollbar-thumb-black-light-2 scrollbar-track-transparent;
+  }
+
+  code {
+    @apply py-4;
+  }
+
+  &:hover [data-rehype-pretty-code-title] {
+    @apply pointer-events-none invisible opacity-0;
+  }
+
+  &:hover .copy-button {
+    @apply pointer-events-auto visible opacity-100;
+  }
+}
+
+code:not([data-rehype-pretty-code-figure] code) {
+  @apply rounded-sm bg-black-light-2 px-1.5 py-[.1875rem];
+}
+
+code:not(h3 code) {
+  @apply text-sm text-primary;
+}
+
+[data-rehype-pretty-code-title] {
+  @apply absolute top-2 right-3 z-99 text-xs font-medium text-grey-dark transition-all duration-250;
+}
+
+[data-highlighted-line] {
+  @apply bg-black-light-2;
+}
+
+[data-line] {
+  @apply px-4;
+}
+
+[data-highlighted-chars] {
+  @apply rounded-sm bg-black-light-2 p-0.5;
+}

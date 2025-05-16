@@ -1,0 +1,86 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900');
+@import 'tailwindcss';
+@import './syntax-highlighting';
+
+@plugin 'tailwind-scrollbar';
+
+@theme {
+  --color-primary: #e06976;
+  --color-primary-light: #f97583;
+  --color-primary-hover-bg: rgb(224, 105, 118, 0.5);
+  --color-secondary: #ffab70;
+  --color-warning: #665823;
+  --color-info: #0d3e5f;
+  --color-grey-dark: #6a6a71;
+  --color-grey: #98989f;
+  --color-grey-light: #dfdfd6;
+  --color-black-dark-2: #000000;
+  --color-black-dark: #161618;
+  --color-black: #1b1b1f;
+  --color-black-light: #202127;
+  --color-black-light-2: #32363f;
+  --color-black-light-3: #414853;
+
+  --container-8xl: 90rem;
+  --container-header-height: 4rem;
+
+  --font-sans:
+    'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', 'Noto Sans', 'Liberation Sans', Arial,
+    sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+}
+
+*,
+*::after,
+*::before {
+  box-sizing: inherit;
+}
+
+html {
+  @apply box-border scroll-smooth;
+}
+
+body {
+  @apply h-screen bg-black font-sans text-base leading-6 text-grey;
+}
+
+button,
+input,
+textarea,
+select,
+kbd,
+code,
+p,
+a {
+  font-family: inherit;
+}
+
+button,
+a {
+  @apply cursor-pointer whitespace-nowrap;
+}
+
+h2,
+h3 {
+  @apply scroll-mt-24;
+}
+
+aside a.active,
+header a.active {
+  @apply text-primary;
+}
+
+ul:has(a[href='/guide/usage'].active) a[href='/guide'] {
+  @apply text-inherit;
+}
+
+.clip-diagonal {
+  clip-path: polygon(0px 0px, 100% 0px, 100% 50%, 0px 100%);
+}
+
+::selection {
+  @apply bg-primary text-black;
+}
+
+:focus-visible {
+  @apply outline-grey-light;
+}

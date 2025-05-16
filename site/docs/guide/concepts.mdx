@@ -1,0 +1,27 @@
+---
+title: Concepts | Guide | Lovit
+---
+
+# Concepts
+
+## Entry function
+
+Entry function is the function where you handle errors. For example, let's say you have an async function called `getPosts` that makes an API call to fetch posts from the backend. If you want to handle errors (like network issues or incorrect responses), you would typically add error handling, such as a `try-catch` block. In Lovit, an entry function is the function where you want to add error handling to it.
+
+## Task
+
+Once you've chosen your entry function (like `getPosts`) and want to add error handling, the next concept to understand is "task". A task is used to define the error handling for a specific entry function.
+
+Instead of adding error handling (like a `try-catch` block) directly inside your function, you create a task for that function. For example, if you want to catch errors in `getPosts`, you create a task called `getPosts`. This task is responsible for handling the errors, so you don’t need to add `try-catch` directly in the function itself.
+
+In short, tasks help you separate error handling from the function itself, keeping your code cleaner and more organized.
+
+## Module
+
+Now that we understand entry functions and tasks, let’s look at modules.
+
+A module is like a section of your app, such as a user module or a post module. It’s responsible for setting up everything needed for your entry functions and tasks to work together smoothly.
+
+Each module is independent and manages its own setup, keeping things organized and easy to maintain.
+
+In summary, modules are where you define the necessary setup for your entry functions and tasks, ensuring they work together correctly.

@@ -1,0 +1,49 @@
+---
+title: Why Lovit | Guide | Lovit
+---
+
+# Why Lovit
+
+## The Problems
+
+Error handling in JavaScript is messy. You’ll often see try-catch blocks all over the code, which makes it hard to read and maintain. There’s no clear, consistent way to handle errors, so each developer handles it differently, leading to inconsistency across the project. Even worse, the same error-handling logic is often repeated in multiple places, making it difficult to keep everything in sync.
+
+Without a standardized approach to error handling, two big problems arise: confusion and extra work. Because there’s no system in place, developers end up rewriting the same error-handling code over and over, unnecessarily complicating the codebase.
+
+Another issue is that error handling often gets mixed in with the main logic of the code. There's no separation of concerns, making the code even messier. Plus, there’s very limited guidance or documentation on how to handle errors properly, leaving developers to figure it out on their own.
+
+## How Lovit solves it
+
+Lovit makes error handling in JavaScript much easier and cleaner. Instead of having `try-catch` blocks all over the code, it keeps error handling separate from the main logic, making your code clearer and easier to read.
+
+With Lovit, you don’t have to repeat the same error-handling code again and again.
+
+It also removes the need for `try-catch` blocks in the main code which makes the code much more readable. This makes the whole process faster and more enjoyable for developers. It comes with easy-to-follow guides, so you don’t have to figure everything out on your own.
+
+In short, Lovit helps you handle errors in a way that’s organized, easy to maintain, and doesn’t make the code messy.
+
+## Overview how it works
+
+At a high level, Lovit separates error handling from your main application logic, creating a cleaner and more organized way to manage errors. Let’s break this down step-by-step:
+
+### Separation of Concerns
+
+Traditionally, error handling is often included directly inside your functions. For example, if you have a `getPosts` function that fetches posts from an API, you might add if statements to check for errors like a `404` status. This can make your code messy and harder to maintain.
+
+With Lovit, error handling is separated from the main logic of your functions. This means you don't have to clutter your `getPosts` function with error-checking logic. Instead, Lovit manages errors separately, ensuring that your function focuses only on its main job.
+
+### Centralized Error Management
+
+Lovit encourages grouping related errors together in one place. For instance, all errors related to posts—such as errors that can happen while `getPosts`, `createPost`, or `deletePost` can be handled within a single place. This keeps things organized when errors are grouped.
+
+This approach avoids mixing errors from different parts of the application (such as post-related errors with user-related errors), which makes your code easier to follow and maintain.
+
+### Reusability of Error Handlers
+
+Lovit also makes it possible to create reusable error-handling logic. Instead of rewriting the same error handling logic we can define shared or global handlers that can be used across different parts. This ensures that your error-handling code remains DRY (Don’t Repeat Yourself), making your codebase more maintainable and reducing the chance for bugs.
+
+## Tree-Shakable
+
+Lovit is designed so that only the actual code you use from the library will be included in your final bundle by your bundler (such as [Parcel](https://parceljs.org), [Vite](https://vite.dev), or [Webpack](https://webpack.js.org)). This helps you get the most out of the library.
+
+When you install Lovit, it comes as a non-minified version to give you full control during development. Your bundler will handle minification for production.

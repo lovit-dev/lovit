@@ -1,0 +1,59 @@
+{
+  "name": "lovit",
+  "version": "1.0.0",
+  "description": "Next generation error handling library",
+  "keywords": [
+    "lovit",
+    "async errors",
+    "http errors",
+    "errors",
+    "javascript",
+    "typescript",
+    "node.js",
+    "error handling"
+  ],
+  "homepage": "https://lovit.dev",
+  "author": "The Lovit Authors (https://github.com/lovit-dev/lovit/graphs/contributors)",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lovit-dev/lovit"
+  },
+  "bugs": {
+    "url": "https://github.com/lovit-dev/lovit/issues"
+  },
+  "exports": {
+    ".": {
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/index.cjs"
+      },
+      "default": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      }
+    },
+    "./package.json": "./package.json"
+  },
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "type": "module",
+  "scripts": {
+    "dev": "tsup --watch",
+    "build": "tsup",
+    "check:type": "tsc"
+  },
+  "files": [
+    "dist"
+  ],
+  "directories": {
+    "lib": "dist"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "devDependencies": {
+    "tsup": "^8.4.0"
+  }
+}

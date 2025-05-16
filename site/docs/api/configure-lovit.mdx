@@ -1,0 +1,195 @@
+---
+title: configureLovit | API | Lovit
+---
+
+# configureLovit
+
+`configureLovit` is the main setup function for Lovit — it connects your modules, their profiles, API entry functions, and more. Essentially, it's responsible for configuring the Lovit library and ensuring all parts work together seamlessly.
+
+```js title="js"
+const getPosts = async () => {...};
+
+const lovit = configureLovit({
+  modules: {
+    post: {
+      profile: postProfile,
+      entryFunctions: { getPosts }
+    }
+  }
+});
+```
+
+## Options
+
+```ts title="ts"
+interface ModuleConfig {
+  profile: Profile;
+  entryFunctions: {
+    [entryFunctionName: string]: (...args: any[]) => any;
+  };
+}
+
+interface LovitConfig {
+  modules?: {
+    [moduleName: string]: ModuleConfig;
+  };
+  global?: {
+    errorCodeMap?: ErrorCodeMap;
+    errorCodeMapper?: (status: string) => StatusCode | undefined;
+    handlers?: Handlers;
+  };
+}
+```
+
+### `modules`
+
+The `modules` option in defines the different parts of your app (like post, user, etc). Each module connects its own profile and related [entry functions](/guide/concepts#entry-function).
+
+```js title="js" {2}
+const lovit = configureLovit({
+  modules: {...}
+});
+```
+
+For example, if you want to add error handling to your post-related functions like `getPosts` and `createPost`, and also handle user-related functions like `createUser` and `createUser`, you can set it up like this:
+
+```js title="js" {6-13}
+const getPosts = async () => {...};
+const createUser = async () => {...};
+
+const lovit = configureLovit({
+  modules: {
+    post: {
+      profile: postProfile,
+      entryFunctions: { getPosts }
+    },
+    user: {
+      profile: userProfile,
+      entryFunctions: { createUser }
+    }
+  }
+});
+```
+
+Make sure the entry function name **exactly matches** the task name you defined in the profile.
+
+If you want to name your function differently in your code, you can still map it properly like this:
+
+```js title="js" /getPosts/
+const myDifferentFunctionNameToGetPosts = async () => {...};
+
+const lovit = configureLovit({
+  modules: {
+    post: {
+      profile: postProfile,
+      entryFunctions: {
+        getPosts: myDifferentFunctionNameToGetPosts
+      }
+    }
+  }
+});
+```
+
+### `global`
+
+The `global` option lets you define settings that apply to all modules:
+
+```js title="js" {9-14}
+const lovit = configureLovit({
+  modules: {
+    post: {
+      profile: postProfile, // You can skip this if using global handlers only
+      entryFunctions: { getPosts }
+    }
+  }
+
+  global: {
+    handlers: {
+      catch: (error) => console.error('🔥 Global error:', error),
+      notFound: (context) => console.warn('📭 Global not found:', context)
+    },
+  }
+});
+```
+
+For example, if your modules all perform the same kind of error logging, you can avoid repeating it in every profile:
+
+```js title="js"
+const postProfile = createProfile({
+  name: 'post',
+  tasks: {
+    getPosts: {
+      notFound: (context) => console.warn('⚠️ Posts not found:', context),
+      catch: (error) => console.error('❌ Error fetching posts:', error)
+    }
+  }
+});
+
+const userProfile = createProfile({
+  name: 'user',
+  tasks: {
+    getUser: {
+      notFound: (context) => console.warn('⚠️ User not found:', context),
+      catch: (error) => console.error('❌ Error fetching user:', error)
+    }
+  }
+});
+```
+
+Since both modules are just logging errors in the same way, there's no need to define profiles for them:
+
+```js title="js"
+const lovit = configureLovit({
+  modules: {
+    post: {
+      entryFunctions: { getPosts }
+    },
+    user: {
+      entryFunctions: { getUser }
+    }
+  },
+
+  global: {
+    handlers: {
+      catch: (error) => console.error('🔥 Global error:', error),
+      notFound: (context) => console.warn('📭 Global not found:', context)
+    }
+  }
+});
+```
+
+But you still need to provide the entry functions, even when not using profiles.
+
+If you want to define custom statuses that Lovit doesn’t understand by default, you can do it like this:
+
+```js title="js" "'auth/invalid-email'"
+const lovit = configureLovit({
+  global: {
+    errorCodeMap: {
+      'auth/invalid-email': 400
+    }
+  }
+});
+```
+
+The key is your custom status (e.g., 'auth/invalid-email'), and the value is the status code that Lovit understands (e.g., 400). Check out [available statuses](/api/create-profile#available-handlers)
+
+Alternatively, you can define it like this:
+
+```js title="js" {3-5}
+const lovit = configureLovit({
+  global: {
+    errorCodeMapper: (status) => {
+      if (status === 'auth/invalid-email') return 400;
+    }
+  }
+});
+```
+
+The status argument is the status extracted from the response that Lovit doesn't recognize by default.
+
+Both methods achieve the same result — translating the custom status to a value that Lovit understands, but in different ways. Choose whichever you prefer.
+
+With this, Lovit will check the `errorCodeMap` or `errorCodeMapper` whenever it gets a status from the response that it doesn’t support by default.
+
+This translation is helpful if you're using services like Firebase, where status codes aren't traditional (like `404` or `400`), but instead look like `auth/invalid-email`, `auth/user-not-found`, or `auth/wrong-password`.

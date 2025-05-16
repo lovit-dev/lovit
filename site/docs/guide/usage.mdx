@@ -1,0 +1,364 @@
+---
+title: Usage | Guide | Lovit
+---
+
+# Usage
+
+The best way to learn something new is by seeing real-world examples. And that’s exactly what we’re going to do — we’ll explore and learn all the important concepts.
+
+Once you're done, head over to the [API Guide](/api/fetch-lovit) for a deeper look at the available public APIs.
+
+## Importing
+
+Using Lovit is simple. Import the functions you need directly from the `lovit` package:
+
+```js title="js"
+// ESM
+import { fetchLovit } from 'lovit';
+
+// or CommonJS
+const { fetchLovit } = require('lovit');
+```
+
+## Overview of JS Error Handling
+
+Let's say we have a simple function that fetches posts from an API and handles cases where things might go wrong:
+
+```js title="js"
+async function getPosts() {
+  try {
+    const res = await fetch('http://localhost:3001/posts');
+
+    if (res.status === 404) {
+      console.warn('⚠️ Posts not found');
+      return;
+    }
+
+    const posts = await res.json();
+    return posts;
+  } catch (error) {
+    console.error('❌ Error fetching posts:', error);
+  }
+}
+```
+
+If the server responds with a `404`, we simply log a warning in the console and return. If the request fails due to something like a network issue, the `catch` block will handle the error.
+
+But as we start adding more logic — like checking for other status codes or doing more than just logging to the console — the function can quickly become harder to read and maintain.
+
+Instead, it would be better if the function focus only on its main job and handle errors separately.
+
+## From fetch to fetchLovit
+
+As you saw above, we need a better way to write error handling that is scalable, clean, and reusable.
+
+To achieve that, the first step is using the [fetchLovit](/api/fetch-lovit) function.
+
+`fetchLovit` is similar to JavaScript's fetch. It makes HTTP requests and is built on top of it with additional options designed specifically for Lovit.
+
+```js {4-7} title="js"
+import { fetchLovit } from 'lovit';
+
+async function getPosts() {
+  const res = await fetchLovit({
+    key: 'post.getPosts',
+    url: 'http://localhost:3001/posts'
+  });
+
+  const posts = await res.json();
+  return posts;
+}
+```
+
+As you can see, we’ve completely removed the need for a `try-catch` block and status checks by using <code>fetchLovit</code>.
+
+Now, instead of passing a URL directly to the function, we pass an [options object](/api/fetch-lovit#options) — in this case, containing the [url](/api/fetch-lovit#url) and a [key](/api/fetch-lovit#key).
+
+The `url` is simply the address we want to make a request to — just like with <code>fetch</code>.
+The `key` is a required property — a unique string that identifies the request. We’ll cover more about it later.
+
+<Callout>
+  You should not add a `try-catch` block inside `getPosts` (entry function) when using `fetchLovit`, as it cause
+  unexpected behavior.
+</Callout>
+
+So, `fetchLovit` makes a request to the given URL and returns whatever response the server sends back.
+
+But now you might be wondering how to enable error handling when you're not using a URL, but instead a custom or service function, like Firebase’s `signInWithEmailAndPassword`.
+
+```js {4} title="js"
+async function login(email, password) {
+  const res = await fetchLovit({
+    key: 'user.login',
+    requestFn: () => signInWithEmailAndPassword(auth, email, password)
+  });
+
+  return res;
+}
+```
+
+If that's the case, instead of passing a URL, you can use the `requestFn` property and pass your function, as shown above.
+
+If the function doesn't require any parameters, you can pass it directly:
+
+```js {4} title="js"
+async function getRandomUser() {
+  const res = await fetchLovit({
+    key: 'user.getRandomUser',
+    requestFn: getUser
+  });
+
+  return res;
+}
+```
+
+<Callout type='info'>You must provide either a `url` or a `requestFn` — but not both.</Callout>
+
+## Handling Errors the Lovit Way
+
+Until now, we've just used `fetchLovit` instead of `fetch` to make our code cleaner by removing all the error handling. But you might ask: “That’s great, but how do I actually handle error cases now, and where?”
+
+For example, what happens if the status is `404`, since we no longer have that if check? Or what about the `catch` block if something goes wrong inside the function?
+
+The answer is simple: we handle errors completely separately, outside of the function itself. And that’s the second step.
+
+To do this, we use something called ["task"](/guide/concepts#task). A task is responsible for defining the error handling logic for entry functions like `getPosts`.
+
+```js title="js"
+import { createProfile } from 'lovit';
+
+const postProfile = createProfile({
+  name: 'post',
+  tasks: {
+    getPosts: {
+      notFound: () => console.warn('⚠️ Posts not found')
+    },
+    createPost: {
+      notFound: () => console.error('❌ Post could not be created')
+    }
+  }
+});
+```
+
+First, we use the `createProfile` function to define a profile. A profile groups together tasks for a specific part of your app to handle errors.
+
+For example, if you want to handle errors related to posts — like `createPost`, `getPosts`, or `deletePost` — you organize them under a single profile. That’s why it’s called `postProfile`.
+
+Then we define a name for the profile. The name is just what we call the profile — in this case, it's "post".
+
+After that, we define our `tasks`. The tasks property takes an object where the key is the name of the function (like <code>getPosts</code> from earlier), and the value is the corresponding [error handlers](/api/create-profile#available-handlers) for that function.
+
+```js {5-9} title="js"
+import { createProfile } from 'lovit';
+
+const postProfile = createProfile({
+  name: 'post',
+  tasks: {
+    getPosts: {
+      notFound: () => console.warn('⚠️ Posts not found');
+    }
+  }
+});
+```
+
+Handlers are functions that run when an error occurs.
+
+For example, if the request to `http://localhost:3001/posts` results in a 404 status, the `notFound` handler defined above will be triggered. In this case, it will log a warning to the console.
+
+```js {6} title="js"
+import { fetchLovit } from 'lovit';
+
+async function getPosts() {
+  const res = await fetchLovit({
+    key: 'post.getPosts',
+    url: 'http://localhost:3001/posts'
+  });
+
+  const posts = await res.json();
+  return posts;
+}
+```
+
+Of course, you can add more handlers — see the [available handlers](/api/create-profile#available-handlers) for a full list.
+
+For example, you can define a `catch` handler, which works just like a `catch` block. If anything goes wrong inside the `getPosts` function — such as a network error or an unexpected exception — the `catch` handler will be triggered.
+
+```js {8} title="js"
+import { createProfile } from 'lovit';
+
+const postProfile = createProfile({
+  name: 'post',
+  tasks: {
+    getPosts: {
+      notFound: () => console.warn('⚠️ Posts not found'),
+      catch: (error) => console.error('❌ Error fetching posts:', error)
+    }
+  }
+});
+```
+
+So the idea works just like the traditional way — only with a different implementation.
+
+Below is a rough illustration of how Lovit handles with the `postProfile` defined above, behind the scenes:
+
+```js title="js"
+try {
+  const res = await fetch('http://localhost:3001/posts');
+
+  if (res.status === 404) {
+    // Simulate notFound handler
+    console.warn('⚠️ Posts not found');
+  }
+
+  return res; // return value for fetchLovit
+} catch (error) {
+  // Simulate catch handler
+  console.error('❌ Error fetching posts:', error);
+}
+```
+
+Now, something to note, if one of the handlers in the tasks is triggered — for example, because the request resulted in a `404` status — then `fetchLovit` will throw an error.
+
+When that happens, any code after `fetchLovit` won't run. In most cases, that's exactly what we want — because continuing to run the code wouldn't make sense if the request has already failed.
+
+```js title="js"
+async function getPosts() {
+  const res = await fetchLovit({
+    key: 'post.getPosts',
+    url: 'http://localhost:3001/posts'
+  });
+
+  // This code won’t execute if fetchLovit throws
+  const posts = await res.json();
+  return posts;
+}
+```
+
+That means you should avoid adding a `try-catch` block to the function, as it lead to unexpected behavior. Lovit takes care of all the error handling for you.
+
+## Accessing Data within Handlers
+
+Now, what if we need to access some data from the `getPosts` function inside a handler like `notFound`? Since the handler is defined separately from the function, we need a way to share or manage that data across both places.
+
+```js title="js"
+import { fetchLovit, createProfile } from 'lovit';
+
+async function getPosts() {
+  const res = await fetchLovit({
+    key: 'post.getPosts',
+    url: 'http://localhost:3001/posts',
+    data: {
+      name: 'John' // this is the data we want to use inside the handler
+    }
+  });
+
+  const posts = await res.json();
+  return posts;
+}
+
+const postProfile = createProfile({
+  name: 'post',
+  tasks: {
+    getPosts: {
+      notFound: (context) => {
+        console.warn(`⚠️ Posts not found for user ${context.data.name}`);
+      }
+    }
+  }
+});
+```
+
+For that, use [context](/api/create-profile#context). The context is an object that Lovit automatically passes to each handler (except for `finally` and `catch`). See which [properties](/api/create-profile#context) are available in the context.
+
+## Managing Modules
+
+Okay, we’ve cleaned up the `getPosts` function and defined the tasks for it. However, the `getPosts` function and the `postProfile` are not yet connected. In order for them to work together,
+
+We can achieve this by using `configureLovit`. It sets up and manages all profiles and entry functions (e.g., getPosts, createPost).
+
+```js title="js"
+const lovit = configureLovit({
+  modules: {
+    post: {
+      profile: postProfile,
+      entryFunctions: { getPosts, createPost }
+    }
+  }
+});
+```
+
+First, we define the `modules` property. A module represents a part of your app, such as a user module or a post module.
+
+Each module takes an object that includes the profile and the corresponding [entry functions](/guide/concepts#entry-function). Entry functions are simply the functions you want to handle within that profile, such as `getPosts` or `createPost`.
+
+But make sure that your entry function has the exact name as the corresponding task.
+
+```js /getPosts/ title="js"
+const postProfile = createProfile({
+  name: 'post',
+  tasks: {
+    getPosts: {
+      notFound: () => console.warn('⚠️ Posts not found')
+    }
+  }
+});
+
+const lovit = configureLovit({
+  modules: {
+    post: {
+      profile: postProfile,
+      entryFunctions: { getPosts }
+    }
+  }
+});
+```
+
+If your entry function has a different name than your task, you can do it like this:
+
+```js {5} title="js"
+const lovit = configureLovit({
+  modules: {
+    post: {
+      profile: postProfile,
+      entryFunctions: { getPosts: myDifferentEntryFnName }
+    }
+  }
+});
+```
+
+## Final step
+
+Finally, we can use the configured entry functions like this:
+
+```js title="js"
+const getUser = async () => {
+  /* ... */
+};
+const getPosts = async () => {
+  /* ... */
+};
+
+const lovit = configureLovit({
+  modules: {
+    post: {
+      profile: postProfile,
+      entryFunctions: { getPosts }
+    },
+    user: {
+      profile: userProfile,
+      entryFunctions: { getUser }
+    }
+  }
+});
+
+// Usage
+async function fetchData() {
+  const posts = await lovit.getPosts();
+  const user = await lovit.getUser();
+  console.log({ posts, user });
+}
+```
+
+So, `configureLovit` returns all the configured entry functions, and you need to use them instead of directly calling the `getPosts` function you defined. In other words, you should use the configured version of the function.
+
+The return type of a configured entry function is the same as the return type of the original entry function.

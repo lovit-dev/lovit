@@ -1,0 +1,18 @@
+{
+  "posts": [
+    {
+      "id": 1,
+      "title": "Welcome to my blog",
+      "content": "This is the first post!",
+      "author": "John Doe",
+      "createdAt": "2025-04-10T10:00:00Z"
+    },
+    {
+      "id": 2,
+      "title": "Another Day, Another Post",
+      "content": "Some thoughts about development...",
+      "author": "Jane Smith",
+      "createdAt": "2025-04-12T08:30:00Z"
+    }
+  ]
+}
