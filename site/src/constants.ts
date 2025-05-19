@@ -23,6 +23,6 @@ export enum ApiPath {
 
 export enum SocialLinks {
   X = 'https://x.com/lovit_js',
-  Discord = 'https://discord.gg/3sBv9mUF',
+  Discord = 'https://discord.gg/kkx5zYKZwR',
   Github = 'https://github.com/lovit-dev/lovit'
 }

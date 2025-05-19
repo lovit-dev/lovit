@@ -25,7 +25,7 @@ For support, sharing best practices, or any discussions you'd like to keep for r
 
 For chatting with others:
 
-[Join the Lovit Discord Server](https://discord.gg/3sBv9mUF)
+[Join the Lovit Discord Server](https://discord.gg/kkx5zYKZwR)
 
 ## Contributing
 

@@ -10,7 +10,7 @@ If you want to work on the demo, check the README in the `demo` folder.
 
 To help keep things organized, we use the [issue tracker](https://github.com/lovit-dev/lovit/issues) for tracking **bugs**, requesting **features**, and managing **pull requests**. Please follow these simple rules:
 
-- **No support requests**: The issue tracker isn't for personal troubleshooting. For help, join our [`Discord server`](https://discord.gg/3sBv9mUF) or use [`GitHub Discussions`](https://github.com/lovit-dev/lovit/discussions).
+- **No support requests**: The issue tracker isn't for personal troubleshooting. For help, join our [`Discord server`](https://discord.gg/kkx5zYKZwR) or use [`GitHub Discussions`](https://github.com/lovit-dev/lovit/discussions).
 
 - **Avoid duplicates**: Before opening a new issue, please [search](https://github.com/lovit-dev/lovit/issues?utf8=%E2%9C%93&q=is%3Aissue) to see if it’s already been reported.
 
