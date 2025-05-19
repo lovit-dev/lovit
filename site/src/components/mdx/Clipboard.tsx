@@ -6,6 +6,11 @@ function Clipboard({ children }: { children: ReactNode }) {
     const buttons: { button: HTMLButtonElement; onClick: () => void }[] = [];
 
     for (const figure of figures) {
+      // Skip if it's a package manager tabs code block
+      if (figure.closest('.package-manager-tabs')) {
+        continue;
+      }
+
       if (figure.querySelector('.copy-button')) {
         continue;
       }

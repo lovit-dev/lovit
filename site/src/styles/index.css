@@ -112,6 +112,20 @@ ul:has(a[href='/guide/usage'].active) a[href='/guide'] {
   gap: 0.5rem;
   font-size: 0.875rem;
   transition: all 0.2s ease;
+  position: relative;
+}
+
+.package-manager-tabs .tab .icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+}
+
+.package-manager-tabs .tab .icon svg {
+  width: 100%;
+  height: 100%;
 }
 
 .package-manager-tabs .tab:hover {
@@ -119,8 +133,18 @@ ul:has(a[href='/guide/usage'].active) a[href='/guide'] {
 }
 
 .package-manager-tabs .tab.active {
-  background: var(--color-black);
   color: var(--color-grey-light);
+}
+
+.package-manager-tabs .tab.active::after {
+  content: '';
+  position: absolute;
+  bottom: -0.5rem;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background: var(--color-primary);
+  border-radius: 2px;
 }
 
 .package-manager-tabs .code-block-wrapper {
@@ -138,6 +162,14 @@ ul:has(a[href='/guide/usage'].active) a[href='/guide'] {
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
   font-size: 0.875rem;
   line-height: 1.5;
+}
+
+.package-manager-tabs .code-block .package-manager {
+  color: var(--color-primary);
+}
+
+.package-manager-tabs .code-block .command-rest {
+  color: var(--color-grey-light);
 }
 
 .package-manager-tabs .copy-button {
