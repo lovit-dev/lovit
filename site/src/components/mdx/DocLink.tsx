@@ -7,7 +7,7 @@ function DocLink({ children, href }: { children: string; href: string }) {
 
   if (isExternal) {
     return (
-      <a className={className} href={href} target='_blank' rel='noopener'>
+      <a className={className} href={href} target='_blank' rel='noreferrer noopener'>
         {children}
       </a>
     );

@@ -93,6 +93,7 @@ export default function Header() {
           <button
             aria-expanded={open}
             aria-controls='mobile-menu'
+            aria-label='Toggle menu'
             onClick={() => setOpen(!open)}
             className='block py-3 text-xl text-grey lg:hidden'
           >
@@ -107,7 +108,7 @@ export default function Header() {
 function SocialLink({ icon: Icon, href }: { icon: IconType; href: string }) {
   return (
     <li>
-      <a href={href} target='_blank' rel='noopener'>
+      <a href={href} target='_blank' rel='noreferrer noopener'>
         <Icon className='text-xl text-grey transition-colors duration-250 hover:text-grey-light' />
       </a>
     </li>
