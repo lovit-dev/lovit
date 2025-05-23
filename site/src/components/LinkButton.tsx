@@ -8,7 +8,7 @@ function LinkButton({ variant, to, className, ...props }: VariantProps<typeof va
   const classes = cn(variants({ variant, className }));
 
   if (isExternal) {
-    return <a href={to} className={classes} target='_blank' rel='noopener' {...props} />;
+    return <a href={to} className={classes} target='_blank' rel='noreferrer noopener' {...props} />;
   }
 
   return <Link to={to} className={classes} {...props} />;
