@@ -22,6 +22,10 @@ We’ll check the open issues, review them, and let you know what to do next. Be
 
 We might not reply right away, but we’ll get back to you as soon as we can. If you don’t hear from us quickly, it doesn’t mean we’re ignoring you. We’ll respond as soon as possible.
 
+## How to Find Something to Contribute
+
+Not sure where to start? See the [WAYS_TO_CONTRIBUTE.md](https://github.com/lovit-dev/lovit/blob/main/.github/WAYS_TO_CONTRIBUTE.md) guide for tips on finding tasks and getting involved.
+
 ## Labels
 
 Our bug tracker uses several labels to help organize and identify issues. Here's what they mean:
