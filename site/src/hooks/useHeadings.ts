@@ -10,7 +10,7 @@ export interface HeadingItem {
   title: string;
 }
 
-export interface Heading {
+interface Heading {
   id: string;
   title: string;
   items: HeadingItem[];
