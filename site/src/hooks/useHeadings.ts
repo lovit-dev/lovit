@@ -5,15 +5,15 @@ const HEADING_H2 = 'H2';
 const HEADING_H3 = 'H3';
 const HEADING_DEFAULT_TITLE = 'Unknown';
 
-export interface HeadingItem {
-  id: string;
-  title: string;
-}
-
-export interface Heading {
+interface Heading {
   id: string;
   title: string;
   items: HeadingItem[];
+}
+
+export interface HeadingItem {
+  id: string;
+  title: string;
 }
 
 export const useHeadings = () => {
